@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML File Browser</title>
+
+```
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f2f2f2;
+        color: #222;
+    }
+
+    header {
+        background: #222;
+        color: white;
+        padding: 25px;
+        text-align: center;
+    }
+
+    header h1 {
+        margin: 0 0 15px;
+    }
+
+    .controls {
+        max-width: 900px;
+        margin: 25px auto;
+        padding: 0 20px;
+    }
+
+    button,
+    input[type="file"] {
+        font-size: 16px;
+    }
+
+    #folderInput {
+        display: none;
+    }
+
+    .choose-button {
+        display: inline-block;
+        padding: 12px 20px;
+        background: #0078d4;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 15px;
+    }
+
+    .choose-button:hover {
+        background: #005ea6;
+    }
+
+    #search {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+
+    #fileCount {
+        margin: 15px 0;
+        color: #666;
+    }
+
+    #fileList {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 20px 40px;
+    }
+
+    .file {
+        display: block;
+        background: white;
+        padding: 16px 20px;
+        margin: 10px 0;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #222;
+        border: 1px solid #ddd;
+        transition: 0.15s;
+    }
+
+    .file:hover {
+        background: #e8f3ff;
+        border-color: #0078d4;
+        transform: translateX(3px);
+    }
+
+    .file-name {
+        font-weight: bold;
+        font-size: 17px;
+    }
+
+    .file-path {
+        font-size: 13px;
+        color: #777;
+        margin-top: 5px;
+    }
+
+    #emptyMessage {
+        text-align: center;
+        color: #777;
+        margin-top: 40px;
+    }
+</style>
+```
+
+</head>
+
+<body>
+
+```
+<header>
+    <h1>HTML File Browser</h1>
+    <p>Select a folder to browse its HTML files</p>
+</header>
+
+<div class="controls">
+
+    <label for="folderInput" class="choose-button">
+        📁 Select Folder
+    </label>
+
+    <input
+        type="file"
+        id="folderInput"
+        webkitdirectory
+        directory
+        multiple
+    >
+
+    <input
+        type="text"
+        id="search"
+        placeholder="🔎 Search HTML files..."
+    >
+
+    <div id="fileCount">
+        No folder selected.
+    </div>
+
+</div>
+
+<div id="fileList"></div>
+
+<div id="emptyMessage">
+    Select a folder to see its HTML files.
+</div>
+
+
+<script>
+
+    const folderInput = document.getElementById("folderInput");
+    const search = document.getElementById("search");
+    const fileList = document.getElementById("fileList");
+    const fileCount = document.getElementById("fileCount");
+    const emptyMessage = document.getElementById("emptyMessage");
+
+    let htmlFiles = [];
+
+
+    // When the user selects a folder
+    folderInput.addEventListener("change", function () {
+
+        htmlFiles = [];
+
+        // Get every file from the selected folder
+        for (const file of folderInput.files) {
+
+            // Only keep HTML files
+            if (
+                file.name.toLowerCase().endsWith(".html") ||
+                file.name.toLowerCase().endsWith(".htm")
+            ) {
+                htmlFiles.push(file);
+            }
+        }
+
+        // Sort alphabetically
+        htmlFiles.sort((a, b) =>
+            a.webkitRelativePath.localeCompare(b.webkitRelativePath)
+        );
+
+        displayFiles();
+    });
+
+
+    // Search when typing
+    search.addEventListener("input", function () {
+        displayFiles();
+    });
+
+
+    function displayFiles() {
+
+        fileList.innerHTML = "";
+
+        const searchText = search.value.toLowerCase();
+
+        // Filter files based on search
+        const filteredFiles = htmlFiles.filter(file =>
+            file.name.toLowerCase().includes(searchText) ||
+            file.webkitRelativePath.toLowerCase().includes(searchText)
+        );
+
+
+        fileCount.textContent =
+            `${filteredFiles.length} of ${htmlFiles.length} HTML files`;
+
+
+        if (filteredFiles.length === 0) {
+
+            emptyMessage.textContent = searchText
+                ? "No HTML files match your search."
+                : "No HTML files found in this folder.";
+
+            emptyMessage.style.display = "block";
+
+            return;
+        }
+
+
+        emptyMessage.style.display = "none";
+
+
+        // Create a link for every file
+        for (const file of filteredFiles) {
+
+            const link = document.createElement("a");
+
+            link.className = "file";
+
+            link.href = URL.createObjectURL(file);
+
+            link.target = "_blank";
+
+            link.rel = "noopener noreferrer";
+
+
+            const name = document.createElement("div");
+
+            name.className = "file-name";
+
+            name.textContent = "📄 " + file.name;
+
+
+            const path = document.createElement("div");
+
+            path.className = "file-path";
+
+            path.textContent = file.webkitRelativePath;
+
+
+            link.appendChild(name);
+
+            link.appendChild(path);
+
+            fileList.appendChild(link);
+        }
+    }
+
+</script>
+```
+
+</body>
+</html>
